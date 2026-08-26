@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>난간 실시간 관제 대시보드</title>
+    <link rel="shortcut icon" href="#">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f6f9; }
+        .box { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .system-status-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .status-badge { font-weight: bold; padding: 6px 12px; border-radius: 4px; font-size: 0.95rem; }
+        .online { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .offline { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .rail-card { border: 1px solid #ccc; padding: 15px; margin: 10px 0; background: #ffffff; border-radius: 6px; }
+        
+        .device-status-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .device-status-item {
+            margin: 4px 0;
+            font-size: 0.95rem;
+        }
+
+        .mode-display-box {
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .mode-number {
+            font-size: 1.3rem;
+            color: #ffeb3b;
+            margin-left: 5px;
+        }
+
+        .error-message-box {
+            display: none;
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>⚡ 난간 실시간 관제 시스템</h2>
+
+    <div class="box">
+        <div style="overflow: hidden; margin-bottom: 10px;">
+            <strong style="font-size: 1.1rem;">🖥️ 시스템 핵심 인프라 상태</strong>
+            <button onclick="logout()" style="float: right;">로그아웃</button>
+        </div>
+        <div class="system-status-container">
+            <div>
+                <span>백엔드 서버: </span>
+                <span id="serverStatus" class="status-badge offline">연결 중...</span>
+            </div>
+            <div>
+                <span>마스터 (라즈베리파이): </span>
+                <span id="masterStatus" class="status-badge offline">신호 대기 중...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h3>난간 실시간 현황</h3>
+        <div id="railListContainer">
+            <p>데이터를 불러오는 중입니다...</p>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let currentApiKey = "";
+
+        let lastMasterHeartbeat = 0;
+        let lastHeartbeatMap = {};
+        let pendingModeTimeouts = {};
+        let reconnectTimer = null;
+
+        window.onload = function() {
+            const apiKey = localStorage.getItem("userApiKey");
+
+            if (!apiKey) {
+                alert("로그인이 필요합니다.");
+                window.location.href = "/login.html";
+                return;
+            }
+
+            currentApiKey = apiKey;
+            startDashboard();
+            startHealthCheckLoop();
+        };
+
+        function logout() {
+            localStorage.removeItem("userApiKey");
+            window.location.href = "/login.html";
+        }
+
+        async function startDashboard() {
+            await loadInitialRailStatus();
+            connectWebSocket();
+        }
+
+        async function loadInitialRailStatus() {
+            try {
+                const response = await fetch(`/api/rails/status?apiKey=${encodeURIComponent(currentApiKey)}`);
+                if (!response.ok) throw new Error("초기 데이터 조회 실패");
+
+                const railDataList = await response.json();
+                const container = document.getElementById("railListContainer");
+                container.innerHTML = "";
+
+                if (railDataList.length === 0) {
+                    container.innerHTML = "<p id='emptyMsg'>등록된 난간이 없습니다. (실시간 신호 수신 대기 중)</p>";
+                    return;
+                }
+
+                railDataList.forEach(rail => {
+                    renderOrUpdateRailCard(rail);
+                });
+            } catch (error) {
+                console.error("REST API 로딩 에러:", error);
+            }
+        }
+
+        function connectWebSocket() {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+
+            const socket = new SockJS('/ws-stomp');
+            stompClient = Stomp.over(socket);
+            stompClient.debug = null;
+
+            stompClient.connect({}, function (frame) {
+                const serverBadge = document.getElementById("serverStatus");
+                serverBadge.innerText = "🟢 연결됨 (LIVE)";
+                serverBadge.className = "status-badge online";
+
+                stompClient.subscribe(`/sub/rails/${currentApiKey}/realtime`, function (message) {
+                    const realtimeData = JSON.parse(message.body);
+                    const railSeq = realtimeData.railSeq || 1;
+
+                    // 마스터(라즈베리파이) 신호 수신 상태 처리
+                    lastMasterHeartbeat = Date.now();
+                    const masterBadge = document.getElementById("masterStatus");
+                    if (masterBadge) {
+                        masterBadge.innerText = "🟢 정상 동작 중";
+                        masterBadge.className = "status-badge online";
+                    }
+
+                    if (pendingModeTimeouts[railSeq]) {
+                        clearTimeout(pendingModeTimeouts[railSeq]);
+                        delete pendingModeTimeouts[railSeq];
+                    }
+
+                    // 💡 [핵심] isError 플래그가 true이거나 센서 데이터가 null/undefined일 때 무조건 에러 처리
+                    const hasDataError = realtimeData.isError === true;
+                    const isDataNull = (realtimeData.leftWatt === null || realtimeData.leftWatt === undefined);
+
+                    if (hasDataError || isDataNull) {
+                        const errorMsg = realtimeData.errorMessage || "ESP32 장비 응답 없음 (데이터 null/미연결)";
+                        
+                        const p4StatusElem = document.getElementById(`p4-status-${railSeq}`);
+                        if (p4StatusElem) {
+                            p4StatusElem.innerHTML = "<span style='color:#dc3545; font-weight:bold;'>⚠️ 상태 이상 (컨트롤 박스 응답 없음)</span>";
+                        }
+
+                        const errorBox = document.getElementById(`error-msg-${railSeq}`);
+                        if (errorBox) {
+                            errorBox.innerText = `⚠️ ${errorMsg}`;
+                            errorBox.style.display = "block";
+                        }
+
+                        return; // 정상 렌더링 통과 차단!
+                    }
+
+                    lastHeartbeatMap[railSeq] = Date.now();
+
+                    const emptyMsg = document.getElementById("emptyMsg");
+                    if (emptyMsg) emptyMsg.remove();
+
+                    renderOrUpdateRailCard(realtimeData, true);
+                });
+            }, function (error) {
+                console.warn("백엔드 서버와 연결이 끊겼습니다. 3초 후 재연결 시도...", error);
+                
+                const serverBadge = document.getElementById("serverStatus");
+                serverBadge.innerText = "🔴 연결 끊김 (재시도 중...)";
+                serverBadge.className = "status-badge offline";
+
+                reconnectTimer = setTimeout(() => {
+                    connectWebSocket();
+                }, 3000);
+            });
+        }
+
+        function startHealthCheckLoop() {
+            setInterval(() => {
+                const now = Date.now();
+
+                // 마스터 (라즈베리파이) 연결 상태 판단 (10초 기준)
+                const masterBadge = document.getElementById("masterStatus");
+                if (lastMasterHeartbeat > 0 && (now - lastMasterHeartbeat <= 10000)) {
+                    masterBadge.innerText = "🟢 정상 동작 중";
+                    masterBadge.className = "status-badge online";
+                } else {
+                    masterBadge.innerText = "🔴 연결 끊김 (오프라인)";
+                    masterBadge.className = "status-badge offline";
+                }
+
+                // 난간 개별 ESP32 모듈 미연결 판단 (10초 기준)
+                Object.keys(lastHeartbeatMap).forEach(railSeq => {
+                    const lastTime = lastHeartbeatMap[railSeq];
+                    const p4StatusElem = document.getElementById(`p4-status-${railSeq}`);
+                    const wroomStatusElem = document.getElementById(`wroom-status-${railSeq}`);
+                    
+                    if (now - lastTime > 10000) {
+                        if (p4StatusElem) p4StatusElem.innerHTML = "<span style='color:red;'>🔴 미연결 / 응답 없음</span>";
+                        if (wroomStatusElem) wroomStatusElem.innerHTML = "<span style='color:red;'>🔴 미연결 / 응답 없음</span>";
+                    }
+                });
+            }, 3000);
+        }
+
+        function renderOrUpdateRailCard(data, isRealtime = false) {
+            const container = document.getElementById("railListContainer");
+            const railSeq = data.railSeq || 1;
+            let card = document.getElementById(`rail-card-${railSeq}`);
+
+            const leftWatt = data.leftWatt !== undefined && data.leftWatt !== null ? data.leftWatt : (data.latestLeftWatt ?? 0.0);
+            const rightWatt = data.rightWatt !== undefined && data.rightWatt !== null ? data.rightWatt : (data.latestRightWatt ?? 0.0);
+            const batteryPct = data.batteryPct !== undefined && data.batteryPct !== null ? data.batteryPct : (data.latestBatteryPct ?? 0);
+            const isCharging = data.isCharging !== undefined ? data.isCharging : false;
+            const currentMode = data.railMode ?? 0;
+
+            let p4Status = "<span style='color:red;'>🔴 미연결 / 응답 없음</span>";
+            let wroomStatus = "<span style='color:red;'>🔴 미연결 / 응답 없음</span>";
+
+            if (isRealtime) {
+                p4Status = "<span style='color:green;'>🟢 정상 동작 중</span>";
+                wroomStatus = "<span style='color:green;'>🟢 정상 동작 중</span>";
+            }
+
+            if (!card) {
+                card = document.createElement("div");
+                card.id = `rail-card-${railSeq}`;
+                card.className = "rail-card";
+                container.appendChild(card);
+
+                card.innerHTML = `
+                    <h4>🛤️ 난간 #${railSeq}</h4>
+
+                    <div class="device-status-box">
+                        <div class="device-status-item">
+                            <strong>• 컨트롤 박스 (ESP32-P4):</strong> <span id="p4-status-${railSeq}">${p4Status}</span>
+                        </div>
+                        <div class="device-status-item">
+                            <strong>• 통신 모듈 (ESP32-WROOM):</strong> <span id="wroom-status-${railSeq}">${wroomStatus}</span>
+                        </div>
+                    </div>
+
+                    <div class="mode-display-box">
+                        💡 현재 동작 LED 모드: <span class="mode-number" id="current-mode-box-${railSeq}">${currentMode}</span>번
+                    </div>
+
+                    <p>발전량 (좌/우): <span id="watt-${railSeq}">${leftWatt} W / ${rightWatt} W</span></p>
+                    <p>배터리 / 충전여부: <span id="battery-${railSeq}">${batteryPct}% (${isCharging ? '충전 중' : '방전 중'})</span></p>
+                    
+                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd;">
+                        <label><strong>LED 모드 변경 요청: </strong></label>
+                        <input type="number" id="mode-input-${railSeq}" value="${currentMode}" style="width: 60px; padding: 4px;">
+                        <button onclick="changeRailMode(${railSeq})" style="padding: 4px 10px;">모드 변경 명령 전송</button>
+                    </div>
+
+                    <div id="error-msg-${railSeq}" class="error-message-box"></div>
+                `;
+            } else {
+                const wattElem = document.getElementById(`watt-${railSeq}`);
+                const batteryElem = document.getElementById(`battery-${railSeq}`);
+                const modeInput = document.getElementById(`mode-input-${railSeq}`);
+                const currentModeBox = document.getElementById(`current-mode-box-${railSeq}`);
+                const errorBox = document.getElementById(`error-msg-${railSeq}`);
+                const p4StatusElem = document.getElementById(`p4-status-${railSeq}`);
+                const wroomStatusElem = document.getElementById(`wroom-status-${railSeq}`);
+
+                if (isRealtime) {
+                    if (p4StatusElem && !p4StatusElem.innerHTML.includes("상태 이상")) {
+                        p4StatusElem.innerHTML = "<span style='color:green;'>🟢 정상 동작 중</span>";
+                    }
+                    if (wroomStatusElem) {
+                        wroomStatusElem.innerHTML = "<span style='color:green;'>🟢 정상 동작 중</span>";
+                    }
+                }
+
+                if (wattElem) wattElem.innerText = `${leftWatt} W / ${rightWatt} W`;
+                if (batteryElem) batteryElem.innerText = `${batteryPct}% (${isCharging ? '충전 중' : '방전 중'})`;
+                
+                if (data.railMode !== undefined) {
+                    if (currentModeBox) currentModeBox.innerText = data.railMode;
+                    if (modeInput) modeInput.value = data.railMode;
+                    if (errorBox) errorBox.style.display = "none";
+                }
+            }
+        }
+
+        async function changeRailMode(railSeq) {
+            const modeValue = document.getElementById(`mode-input-${railSeq}`).value;
+            const errorBox = document.getElementById(`error-msg-${railSeq}`);
+            if (errorBox) errorBox.style.display = "none";
+
+            if (pendingModeTimeouts[railSeq]) {
+                clearTimeout(pendingModeTimeouts[railSeq]);
+            }
+
+            try {
+                await fetch('/api/rails/mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        apiKey: currentApiKey,
+                        railSeq: parseInt(railSeq),
+                        railMode: parseInt(modeValue)
+                    })
+                });
+
+                pendingModeTimeouts[railSeq] = setTimeout(() => {
+                    const p4StatusElem = document.getElementById(`p4-status-${railSeq}`);
+                    if (p4StatusElem) {
+                        p4StatusElem.innerHTML = "<span style='color:#dc3545; font-weight:bold;'>⚠️ 상태 이상 (응답 시간 초과)</span>";
+                    }
+
+                    alert(`⚠️ [장비 통신 불가]\n난간 #${railSeq} 제어 장치가 응답하지 않습니다.`);
+                    if (errorBox) {
+                        errorBox.innerText = "⚠️ 하드웨어 제어 응답 시간 초과 (장비 미연결)";
+                        errorBox.style.display = "block";
+                    }
+                }, 5000);
+
+            } catch (error) {
+                console.error("서버 요청 실패:", error);
+                alert("백엔드 서버 통신 오류 발생");
+            }
+        }
+    </script>
+</body>
+</html>

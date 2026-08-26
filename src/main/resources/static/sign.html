@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecoluminous - 회원가입 및 API Key 발급</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .card h2 {
+            margin-bottom: 8px;
+            color: #1a202c;
+            font-size: 24px;
+        }
+        .card p.subtitle {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #3182ce;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: #2b6cb0;
+        }
+        /* Result Section */
+        #result-box {
+            display: none;
+            margin-top: 24px;
+            padding: 16px;
+            background-color: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 8px;
+        }
+        #result-box h4 {
+            color: #22543d;
+            margin-bottom: 8px;
+        }
+        .key-display {
+            background-color: #ffffff;
+            border: 1px dashed #38a169;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            color: #276749;
+            text-align: center;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .error-msg {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>회원가입</h2>
+    <p class="subtitle">스마트 난간 시스템 계정 및 API Key 생성</p>
+
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" placeholder="example@ecoluminous.com" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">비밀번호 (8자 이상)</label>
+            <input type="password" id="password" placeholder="••••••••" minlength="8" required>
+        </div>
+
+        <div class="form-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" placeholder="홍길동" required>
+        </div>
+
+        <button type="submit" class="btn-submit">계정 및 API Key 발급받기</button>
+        <div id="errorMsg" class="error-msg"></div>
+    </form>
+
+    <!-- 발급 성공 결과 창 -->
+    <div id="result-box">
+        <h4>🎉 회원가입 성공!</h4>
+        <p style="font-size: 13px; color: #4a5568;">아래 API Key를 라즈베리파이 설정에 입력하세요.</p>
+        <div class="key-display" id="apiKeyDisplay">XXXX-XXXX-XXXX-XXXX</div>
+        <p style="font-size: 12px; color: #718096; text-align: center;">사용자: <span id="userNameDisplay"></span> (<span id="userEmailDisplay"></span>)</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const name = document.getElementById('name').value;
+        const errorMsg = document.getElementById('errorMsg');
+        const resultBox = document.getElementById('result-box');
+
+        errorMsg.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/users/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password, name })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // 발급 성공 시 처리
+                document.getElementById('apiKeyDisplay').innerText = data.apiKey;
+                document.getElementById('userNameDisplay').innerText = data.name;
+                document.getElementById('userEmailDisplay').innerText = data.email;
+                resultBox.style.display = 'block';
+            } else {
+                // Validation 에러 또는 중복 이메일 예외 처리
+                errorMsg.innerText = data.message || '회원가입 중 오류가 발생했습니다.';
+                errorMsg.style.display = 'block';
+                resultBox.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            errorMsg.innerText = '서버 통신에 실패했습니다.';
+            errorMsg.style.display = 'block';
+            resultBox.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 - 난간 관제 시스템</title>
+    <style>
+        body { font-family: sans-serif; margin: 50px; display: flex; justify-content: center; }
+        .login-box { border: 1px solid #ccc; padding: 25px; width: 320px; border-radius: 5px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; }
+        .input-group input { width: 95%; padding: 8px; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>🔑 로그인</h2>
+    <form id="loginForm">
+        <div class="input-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" required placeholder="user@example.com">
+        </div>
+        <div class="input-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">로그인</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            // UserService / UserController의 로그인 엔드포인트 호출
+            const response = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: password })
+            });
+
+            if (!response.ok) {
+                alert("로그인 실패: 이메일이나 비밀번호를 확인하세요.");
+                return;
+            }
+
+            const data = await response.json(); 
+            // 서버 응답 예시: { "email": "...", "apiKey": "F6JX-J902-5K1Z-WLLE", ... }
+
+            if (data.apiKey) {
+                // 로그인 성공 시 API Key를 브라우저 로컬 스토리지에 저장
+                localStorage.setItem("userApiKey", data.apiKey);
+                alert("로그인 성공!");
+                // 대시보드로 이동
+                window.location.href = "/dashboard.html";
+            } else {
+                alert("API Key 정보를 가져올 수 없습니다.");
+            }
+        } catch (error) {
+            console.error("로그인 에러:", error);
+            alert("서버 통신 중 오류가 발생했습니다.");
+        }
+    });
+</script>
+
+</body>
+</html>
