@@ -243,13 +243,13 @@
             padding-right: 16px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
         }
 
         .card-control-innerbox-2 {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             padding-left: 2px;
         }
 
@@ -350,8 +350,9 @@
             border: 1px solid var(--neon-green);
             color: var(--neon-green); 
             padding: 7px 0; 
-            width: 100%; 
-            margin-top: 4px; 
+            width: 140px; 
+            margin-top: 15px;
+            margin-left: 47px; 
             border-radius: 6px;
             font-weight: 800; 
             cursor: pointer; 
@@ -740,11 +741,11 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: var(--neon-cyan);
             font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             padding: 4px 8px;
             border-radius: 6px;
-            width: 120px;
+            width: 115px;
             text-align: center;
             outline: none;
             transition: all 0.2s;
@@ -996,7 +997,7 @@
             <div class="card-title">LED 설정</div>
             
             <div class="category-tab-container">
-                <button class="category-tab-btn active" onclick="switchCategoryTab('basic', 0)">기본 LED</button>
+                <button class="category-tab-btn active" onclick="switchCategoryTab('basic', 0)">LED 모드</button>
                 <button class="category-tab-btn" onclick="switchCategoryTab('weather', 1)">☀️ 날씨 연동</button>
                 <button class="category-tab-btn" onclick="switchCategoryTab('music', 2)">🎵 음악 연결</button>
             </div>
@@ -1074,7 +1075,7 @@
 
             <!-- SOS & 반이중 PTT 음성 통화 카드 -->
             <div class="card sos-card" id="sosCardContainer">
-                <div class="card-title" style="background: linear-gradient(135deg, #a82c35 0%, #781d24 100%);">SOS & CALL</div>
+                <div class="card-title" style="background: linear-gradient(135deg, #a82c35 0%, #781d24 100%); margin-bottom:0px; height:60px;font-size:27px;">SOS & CALL</div>
                 <div class="sos-card-flex">
                     <div class="sos-display-box" onclick="triggerMp3Alarm()">
                         <div class="sos-big-text" id="sosBigText">🟢 NORMAL</div>
@@ -1102,10 +1103,10 @@
                 <div class="emergency-contact-group">
                     <!-- 관공서/지자체 상황실 -->
                     <div class="contact-row">
-                        <span class="contact-label">🏛 민원센터</span>
+                        <span class="contact-label">🏛 주민센터</span>
                         <div class="contact-input-wrap">
                             <input type="text" class="contact-input" id="telGov" value="031-123-1234" placeholder="전화번호">
-                            <a href="tel:031-120" id="callGov" class="btn-call-direct" onclick="dialEmergency('telGov', event)">📞 호출</a>
+                            <a href="tel:031-120" id="callGov" class="btn-call-direct" onclick="dialEmergency('telGov', event)">문자발송</a>
                         </div>
                     </div>
 
@@ -1114,7 +1115,7 @@
                         <span class="contact-label">🚒 소방서</span>
                         <div class="contact-input-wrap">
                             <input type="text" class="contact-input" id="telFire" value="119" placeholder="전화번호">
-                            <a href="tel:119" id="callFire" class="btn-call-direct" onclick="dialEmergency('telFire', event)">📞 호출</a>
+                            <a href="tel:119" id="callFire" class="btn-call-direct" onclick="dialEmergency('telFire', event)">문자발송</a>
                         </div>
                     </div>
 
@@ -1123,7 +1124,7 @@
                         <span class="contact-label">👮 경찰서</span>
                         <div class="contact-input-wrap">
                             <input type="text" class="contact-input" id="telPolice" value="112" placeholder="전화번호">
-                            <a href="tel:112" id="callPolice" class="btn-call-direct" onclick="dialEmergency('telPolice', event)">📞 호출</a>
+                            <a href="tel:112" id="callPolice" class="btn-call-direct" onclick="dialEmergency('telPolice', event)">문자발송</a>
                         </div>
                     </div>
                 </div>
@@ -1192,17 +1193,17 @@
     		<div class="card-control-innerbox">
     			<!-- 좌측: 2x2 기능 ON/OFF 제어 (💡 3. 마이크 -> 비상벨 변경) -->
     			<div class="card-control-innerbox-1">
-    				<div class="card-title" style="font-size:16px;">기능 ON/OFF 설정</div>
+    				<div class="card-title" style="font-size:16px;margin-bottom:10px;">기능 ON/OFF 설정</div>
 	    			<div class="device-ctrl-grid">
 	    				
-	    				<div class="ctrl-item">
+	    				<div class="ctrl-item" style="margin-bottom:5px;">
                             <span class="ctrl-label">🤖 AI 음성</span>
                             <div class="ctrl-btn-group">
                                 <button type="button" class="btn-toggle on active" onclick="setDeviceState('aiVoice', true, this)">ON</button>
                                 <button type="button" class="btn-toggle off" onclick="setDeviceState('aiVoice', false, this)">OFF</button>
                             </div>
                         </div>
-                        <div class="ctrl-item">
+                        <div class="ctrl-item" style="margin-bottom:5px;">
                             <span class="ctrl-label">🔔 비상벨</span>
                             <div class="ctrl-btn-group">
                                 <button type="button" class="btn-toggle on active" onclick="setDeviceState('alarmBell', true, this)">ON</button>
@@ -1232,18 +1233,30 @@
 
     			<!-- 우측: 관제 기준 위치 설정 -->
     			<div class="card-control-innerbox-2">
-    				<div class="card-title" style="font-size:16px;">시스템 위도/경도 설정</div>
-	    			<div class="geo-setting-form">
-                        <div class="geo-row">
-                            <span style="white-space:nowrap;">위도 :</span>
-                            <input type="text" class="custom-geo-input" id="inputLat" value="37.163921">
-                        </div>
-                        <div class="geo-row">
-                            <span style="white-space:nowrap;">경도 :</span>
+    				<div class="card-title" style="font-size:16px;">시스템 설치정보 설정</div>
+					<div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; gap:5px;">
+						<div>
+			    			<div class="geo-setting-form">
+		                        <div class="geo-row">
+		                            <span style="white-space:nowrap;">위도 :</span>
+		                            <input type="text" class="custom-geo-input" id="inputLat" value="37.163921">
+		                        </div>
+		                        <div class="geo-row">
+		                            <span style="white-space:nowrap;">경도 :</span>
+		                            <input type="text" class="custom-geo-input" id="inputLng" value="126.960293">
+		                        </div>
+
+		                       <!--  <button class="geo-btn" onclick="updateMapLocationFromInput()">좌표 수동 변경 및 지도 반영</button> -->
+			                </div> 				
+						</div>
+						<div>
+							<button class="geo-btn" onclick="updateMapLocationFromInput()">좌표 변경 및 지도 반영</button>
+						</div>
+                        <div class="geo-row" style="grid-column: span 2;">
+                            <span style="white-space:nowrap;">주소 :</span>
                             <input type="text" class="custom-geo-input" id="inputLng" value="126.960293">
-                        </div>
-                        <button class="geo-btn" onclick="updateMapLocationFromInput()">좌표 수동 변경 및 지도 반영</button>
-	                </div>    			
+                        </div>						
+					</div>   			
     			</div>
     		</div>
     	</div>
