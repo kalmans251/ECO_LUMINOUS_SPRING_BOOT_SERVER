@@ -39,6 +39,9 @@ public class RailRealtimeController {
     // ==========================================
     // 2. LED 모드 변경 명령 중계 (WebSocket / HTTP REST)
     // ==========================================
+    
+    
+    
     @MessageMapping("/rails/mode")
     public void changeRailModeWebSocket(RailModeRequestDto dto) {
         requestModeChangeToDevice(dto);
