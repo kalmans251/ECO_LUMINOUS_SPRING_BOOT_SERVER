@@ -1,8 +1,8 @@
 package com.ecoluminous.controller;
 
-import com.ecoluminous.dto.device.DeviceLogRequestDto;
 import com.ecoluminous.dto.rail.RailModeConfirmDto;
 import com.ecoluminous.dto.rail.RailModeRequestDto;
+import com.ecoluminous.dto.rail.RailStatusResponseDto;
 import com.ecoluminous.service.RailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,9 @@ public class RailRealtimeController {
     // 1. 실시간 난간 센서/배터리/레이더 데이터 중계
     // ==========================================
     @MessageMapping("/rails/realtime")
-    public void receiveRealtimeData(DeviceLogRequestDto dto) {
+    public void receiveRealtimeData(RailStatusResponseDto dto) {
+        log.info("📡 [중계 로그] railSeq: {}, radar1Targets: {}", dto.getRailSeq(), dto.getRadar1Targets());
+        
         String destination = "/sub/rails/" + dto.getApiKey() + "/realtime";
         messagingTemplate.convertAndSend(destination, (Object) dto);
     }
@@ -99,7 +101,6 @@ public class RailRealtimeController {
 
     /**
      * 관제소 PTT 다운링크 (웹 브라우저 PTT 마이크 -> 백엔드 -> RPi 현장 스피커)
-     * 고속 유입 데이터이므로 로깅 오버헤드를 제거하여 지연시간을 최소화합니다.
      */
     @MessageMapping("/rails/voice/downlink")
     public void handleVoiceDownlink(Map<String, Object> payload) {

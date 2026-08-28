@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <!-- 모바일/터치 기기 화면 확대(핀치 줌) 완벽 차단 -->
+    <!-- 모바일/터치 기기 화면 확대 완벽 차단 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>AI Eco Luminous Monitoring System</title>
     
@@ -387,7 +387,7 @@
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
         }
 
-        /* 양쪽 대칭 헤더 라인 및 호버 발광 */
+        /* 헤더 라인 및 호버 발광 */
         .card-title {
             font-size: 20px;
             font-weight: 800;
@@ -516,7 +516,7 @@
         .merged-logo-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
         @keyframes spin-3d-correct { 0% { transform: translate(-50%, -50%) rotateY(0deg); } 100% { transform: translate(-50%, -50%) rotateY(360deg); } }
 
-        /* LD2450 동적 파동 레이더 전용 스타일 */
+        /* LD2450 동적 파동 레이더 카드 전용 */
         .radar-container {
             display: flex;
             flex-direction: column;
@@ -532,7 +532,6 @@
             position: relative;
         }
 
-        /* 💡 레이더 우측 상단 인원수 뱃지 */
         .radar-count-badge {
             position: absolute;
             top: 10px;
@@ -544,12 +543,6 @@
             gap: 6px;
             z-index: 10;
             backdrop-filter: blur(4px);
-        }
-
-        .radar-count-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-sub);
         }
 
         .radar-count-val {
@@ -598,7 +591,6 @@
             padding: 0px 5px; border-radius: 4px;
         }
 
-        /* 💡 난간 수량 설정 입력 그룹 */
         .rail-count-setting-group {
             display: flex;
             align-items: center;
@@ -698,7 +690,7 @@
             min-height: 0;
         }
 
-        /* 🚨 비상 연락망 스타일 */
+        /* 비상 연락망 스타일 */
         .emergency-contact-group {
             display: flex;
             flex-direction: column;
@@ -902,7 +894,6 @@
     <audio id="sosAudio" src="993AB73B5CF6B10A03.mp3" preload="auto"></audio>
 
     <div class="main-header">
-        <!-- 💡 상단 좌측 통계 데이터 메뉴 드롭다운 -->
         <div class="top-left-menu-group">
             <button class="menu-dropdown-btn" id="btnStatsMenu" onclick="toggleStatsMenu(event)">
                 📊 통계 데이터 ▾
@@ -933,7 +924,6 @@
         </div>
     </div>
 
-    <!-- 1행 영역 -->
     <div class="grid-row-3">
         <!-- 시스템 설정 카드 -->
         <div class="card-system-setting">
@@ -1101,7 +1091,6 @@
             <div class="card">
                 <div class="card-title">비상 연락망</div>
                 <div class="emergency-contact-group">
-                    <!-- 관공서/지자체 상황실 -->
                     <div class="contact-row">
                         <span class="contact-label">🏛 주민센터</span>
                         <div class="contact-input-wrap">
@@ -1110,7 +1099,6 @@
                         </div>
                     </div>
 
-                    <!-- 소방서 -->
                     <div class="contact-row">
                         <span class="contact-label">🚒 소방서</span>
                         <div class="contact-input-wrap">
@@ -1119,7 +1107,6 @@
                         </div>
                     </div>
 
-                    <!-- 경찰서 -->
                     <div class="contact-row">
                         <span class="contact-label">👮 경찰서</span>
                         <div class="contact-input-wrap">
@@ -1139,7 +1126,6 @@
 	                    <span class="device-status-tag" id="selectedDeviceTag">SELECT #1</span>
 	                </div>
 
-                    <!-- 💡 1. 난간 수량 설정 폼 -->
                     <div class="rail-count-setting-group">
                         <span class="rail-count-label">수량 선택 :</span>
                         <input type="number" class="rail-count-input" id="inputTotalDevices" min="1" max="100" value="15">
@@ -1172,13 +1158,11 @@
             </div>
         </div>
         
-        <!-- 우측 LD2450 동적 파동 레이더 카드 -->
+        <!-- 우측 Radar 1 동적 파동 레이더 카드 -->
         <div class="card projector-merged-square-card2">
-            <div class="card-title">출입인원 CHECK</div>
+            <div class="card-title">출입인원 CHECK (Radar 1)</div>
             <div class="radar-container">
-                <!-- 💡 2. 레이더 우측 상단 출입 인원수 카운터 배지 -->
                 <div class="radar-count-badge">
-                    
                     <span class="radar-count-val" id="radarDetectedCount">0</span>
                 </div>
 
@@ -1188,14 +1172,12 @@
             </div>
         </div>
     	
-    	<!-- 하단 중앙 컨트롤 카드 (2분할: 2x2 기능 토글 / 위도경도 설정) -->
+    	<!-- 하단 중앙 컨트롤 카드 -->
     	<div class="card-control-setting">
     		<div class="card-control-innerbox">
-    			<!-- 좌측: 2x2 기능 ON/OFF 제어 (💡 3. 마이크 -> 비상벨 변경) -->
     			<div class="card-control-innerbox-1">
     				<div class="card-title" style="font-size:16px;margin-bottom:10px;">기능 ON/OFF 설정</div>
 	    			<div class="device-ctrl-grid">
-	    				
 	    				<div class="ctrl-item" style="margin-bottom:5px;">
                             <span class="ctrl-label">🤖 AI 음성</span>
                             <div class="ctrl-btn-group">
@@ -1224,14 +1206,9 @@
                                 <button type="button" class="btn-toggle off" onclick="setDeviceState('radar', false, this)">OFF</button>
                             </div>
                         </div>
-
-
-
-
 	                </div>
     			</div>
 
-    			<!-- 우측: 관제 기준 위치 설정 -->
     			<div class="card-control-innerbox-2">
     				<div class="card-title" style="font-size:16px;">시스템 설치정보 설정</div>
 					<div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; gap:5px;">
@@ -1245,8 +1222,6 @@
 		                            <span style="white-space:nowrap;">경도 :</span>
 		                            <input type="text" class="custom-geo-input" id="inputLng" value="126.960293">
 		                        </div>
-
-		                       <!--  <button class="geo-btn" onclick="updateMapLocationFromInput()">좌표 수동 변경 및 지도 반영</button> -->
 			                </div> 				
 						</div>
 						<div>
@@ -1254,7 +1229,7 @@
 						</div>
                         <div class="geo-row" style="grid-column: span 2;">
                             <span style="white-space:nowrap;">주소 :</span>
-                            <input type="text" class="custom-geo-input" id="inputLng" value="126.960293">
+                            <input type="text" class="custom-geo-input" id="inputAddress" value="충청남도 태안군 남면 안면대로 1650">
                         </div>						
 					</div>   			
     			</div>
@@ -1265,7 +1240,7 @@
     <!-- JavaScript 로직 -->
     <script>
     const API_KEY = "OMWM-KSUI-LJGE-TKKF";
-    let TOTAL_DEVICES = 15; // 💡 가변 난간 수량 변수
+    let TOTAL_DEVICES = 15;
     let markerInstances = {}; 
     let deviceStateMap = {};
     
@@ -1285,7 +1260,7 @@
     const defaultLat = 37.1639214328377; 
     const defaultLng = 126.960293054919;
 
-    // 브라우저 줌(확대/축소) 방지 로직
+    // 브라우저 줌 방지
     document.addEventListener('keydown', function(event) {
         if (event.ctrlKey && (event.key === '=' || event.key === '-' || event.key === '+')) {
             event.preventDefault();
@@ -1298,7 +1273,7 @@
     }, { passive: false });
 
     // =========================================================================
-    // 📊 상단 통계 데이터 드롭다운 및 비상 전화 로직
+    // 📊 통계 메뉴 & 전화 로직
     // =========================================================================
     function toggleStatsMenu(e) {
         e.stopPropagation();
@@ -1330,7 +1305,7 @@
     }
 
     // =========================================================================
-    // 🎧 1. 현장 마이크 실시간 재생 (Web Audio API - 8000Hz PCM 청음)
+    // 🎧 1. 현장 마이크 실시간 청음 (Web Audio API - 8000Hz PCM)
     // =========================================================================
     let rxAudioCtx = null;
     let rxNextPlayTime = 0;
@@ -1566,7 +1541,6 @@
         }
     }
 
-    // 💡 동적 난간 수량 변경 함수
     function updateTotalDevicesCount() {
         const input = document.getElementById('inputTotalDevices');
         const newCount = parseInt(input.value);
@@ -1609,7 +1583,6 @@
     function rebuildMapMarkers() {
         if (!map) return;
 
-        // 기존 마커 전체 제거
         Object.keys(markerInstances).forEach(k => {
             if (markerInstances[k]) map.removeLayer(markerInstances[k]);
         });
@@ -1756,10 +1729,13 @@
             document.getElementById('systemCommState').style.color = "var(--neon-green)";
 
             stompClient.subscribe(`/sub/rails/${API_KEY}/realtime`, function (response) {
-                const data = JSON.parse(response.body);
-                if (data && data.railSeq) {
-                    processIncomingTelemetry(data);
-                    if (data.targets) updateRadarTargets(data.targets);
+                try {
+                    const data = JSON.parse(response.body);
+                    if (data && data.railSeq) {
+                        processIncomingTelemetry(data);
+                    }
+                } catch (e) {
+                    console.error("텔레메트리 파싱 에러:", e);
                 }
             });
 
@@ -1777,6 +1753,7 @@
         });
     }
 
+    // 💡 텔레메트리 수신부 (Radar 1 단독 라우팅)
     function processIncomingTelemetry(data) {
         const id = data.railSeq;
         if (id < 1 || id > TOTAL_DEVICES) return;
@@ -1788,6 +1765,12 @@
             isError: !!data.isError,
             isEmergency: !!data.isEmergency
         });
+
+        // 🎯 현재 선택된 난간 또는 전체선택 시 1번 난간의 Radar1 데이터를 캔버스에 주입
+        const isCurrentTarget = (!isAllSelected && id === selectedDeviceId) || (isAllSelected && id === 1);
+        if (isCurrentTarget && data.radar1Targets) {
+            updateRadarTargets(data.radar1Targets);
+        }
 
         const rxLat = data.lat || data.latitude;
         const rxLng = data.lng || data.longitude;
@@ -1879,6 +1862,10 @@
         selectedDeviceId = id;
         isAllSelected = false;
         
+        // 타깃 필터 초기화
+        targetKalmans.forEach(k => k.reset());
+        radarTargets.forEach(t => t.active = false);
+
         document.querySelectorAll('.id-circle').forEach(el => el.classList.remove('selected'));
         const targetCircle = document.getElementById(`device-circle-${id}`);
         if(targetCircle) targetCircle.classList.add('selected');
@@ -2073,20 +2060,81 @@
     }
 
     // =========================================================================
-    // 📡 4. LD2450 다중 펄스 파동(Ripple Wave) 기반 레이더 렌더러
+    // 📡 4. 2D 칼만 필터 및 직교좌표계 기반 Radar 1 렌더러
     // =========================================================================
+    class KalmanFilter2D {
+        constructor(processNoise = 0.05, measurementNoise = 0.12) {
+            this.q = processNoise;
+            this.r = measurementNoise;
+            this.reset();
+        }
+
+        reset() {
+            this.x = 0;
+            this.y = 0;
+            this.vx = 0;
+            this.vy = 0;
+            this.p = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+            this.lastTime = null;
+            this.isInitialized = false;
+        }
+
+        update(mx, my) {
+            const now = performance.now() / 1000.0;
+            if (!this.isInitialized) {
+                this.x = mx;
+                this.y = my;
+                this.vx = 0;
+                this.vy = 0;
+                this.lastTime = now;
+                this.isInitialized = true;
+                return { x: this.x, y: this.y };
+            }
+
+            const dt = Math.min(Math.max(now - this.lastTime, 0.01), 0.5);
+            this.lastTime = now;
+
+            // Prediction
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+            this.p[0][0] += (this.p[2][2] + this.q) * dt * dt;
+            this.p[1][1] += (this.p[3][3] + this.q) * dt * dt;
+            this.p[2][2] += this.q * dt;
+            this.p[3][3] += this.q * dt;
+
+            // Update
+            const kx = this.p[0][0] / (this.p[0][0] + this.r);
+            const ky = this.p[1][1] / (this.p[1][1] + this.r);
+
+            const ex = mx - this.x;
+            const ey = my - this.y;
+
+            this.x += kx * ex;
+            this.y += ky * ey;
+            this.vx += (kx / dt) * ex * 0.1;
+            this.vy += (ky / dt) * ey * 0.1;
+
+            this.p[0][0] *= (1 - kx);
+            this.p[1][1] *= (1 - ky);
+
+            return { x: this.x, y: this.y };
+        }
+    }
+
     let radarCanvas, radarCtx;
+    const targetKalmans = [new KalmanFilter2D(), new KalmanFilter2D(), new KalmanFilter2D()];
+
     let radarTargets = [
-        { id: 1, dist: 2.26, angle: -28.5, speed: 0.00, active: true },
-        { id: 2, dist: 0.93, angle: 55.8, speed: 0.39, active: true },
-        { id: 3, dist: 0.00, angle: 0.0, speed: 0.00, active: false }
+        { id: 1, x: 0.0, y: 0.0, active: false },
+        { id: 2, x: 0.0, y: 0.0, active: false },
+        { id: 3, x: 0.0, y: 0.0, active: false }
     ];
 
-    const MAX_RADAR_DIST = 6.0; 
-    const FOV_DEG = 120; // 좌우 ±60도
+    const MAX_RADAR_X = 3.0; // 좌/우 ±3m 표시 범위
+    const MAX_RADAR_Y = 6.0; // 전방 최대 6m 표시 범위
+    const FOV_DEG = 120;     // 시야각 120도
 
-    const waves = [];
-    const MAX_WAVES = 1;
+    const waves = [{ progress: 0.0 }];
 
     function initRadarCanvas() {
         radarCanvas = document.getElementById('ld2450RadarCanvas');
@@ -2094,41 +2142,48 @@
         radarCtx = radarCanvas.getContext('2d');
         resizeRadarCanvas();
 
-        for (let i = 0; i < MAX_WAVES; i++) {
-            waves.push({ progress: i / MAX_WAVES });
-        }
-
-        // 초기 인원수 계산 반영
-        updateRadarTargets(radarTargets);
         requestAnimationFrame(renderRadarFrame);
     }
 
     function resizeRadarCanvas() {
         if (!radarCanvas) return;
-        radarCanvas.width = radarCanvas.clientWidth * window.devicePixelRatio;
-        radarCanvas.height = radarCanvas.clientHeight * window.devicePixelRatio;
+        const rect = radarCanvas.getBoundingClientRect();
+        const w = rect.width || radarCanvas.clientWidth || 300;
+        const h = rect.height || radarCanvas.clientHeight || 250;
+        
+        radarCanvas.width = w * window.devicePixelRatio;
+        radarCanvas.height = h * window.devicePixelRatio;
     }
 
-    // 💡 타깃 데이터 업데이트 및 인원수 카운트 갱신
+    // 💡 Radar1 타깃 데이터 수신 및 칼만 필터 처리
     function updateRadarTargets(targetList) {
         let activeCount = 0;
 
         for (let i = 0; i < 3; i++) {
-            if (targetList && targetList[i] && targetList[i].dist > 0) {
+            const raw = targetList && targetList[i];
+            
+            // X, Y mm 값이 유효한지 검증 (0, 0이면 미감지 상태)
+            if (raw && (raw.x !== 0 || raw.y !== 0)) {
+                const rawX = raw.x / 1000.0;           // mm -> m 단위 변환
+                const rawY = Math.abs(raw.y) / 1000.0; // mm -> m (전방 거리 양수화)
+
+                const filtered = targetKalmans[i].update(rawX, rawY);
+
                 radarTargets[i] = {
                     id: i + 1,
-                    dist: targetList[i].dist,
-                    angle: targetList[i].angle,
-                    speed: targetList[i].speed,
+                    x: filtered.x,
+                    y: filtered.y,
                     active: true
                 };
                 activeCount++;
             } else {
+                if (radarTargets[i].active) {
+                    targetKalmans[i].reset();
+                }
                 radarTargets[i].active = false;
             }
         }
 
-        // 인원수 텍스트 갱신
         const countBadge = document.getElementById('radarDetectedCount');
         if (countBadge) {
             countBadge.innerText = `${activeCount}`;
@@ -2144,23 +2199,27 @@
 
         const originX = w / 2;
         const originY = 20 * window.devicePixelRatio; 
-        const radius = Math.min(w * 0.9, (h - originY) * 0.96);
+        const maxPixelH = Math.max(10, (h - originY) * 0.95);
+        const radius = maxPixelH;
+
+        const scaleY = maxPixelH / MAX_RADAR_Y; 
+        const scaleX = (w * 0.45) / MAX_RADAR_X; 
 
         const startAngle = (90 - FOV_DEG / 2) * (Math.PI / 180); 
         const endAngle = (90 + FOV_DEG / 2) * (Math.PI / 180);   
 
-        // 1. 부채꼴 배경 (하얀색 반투명 채움)
+        // 1. 부채꼴 배경
         radarCtx.save();
         radarCtx.beginPath();
         radarCtx.moveTo(originX, originY);
         radarCtx.arc(originX, originY, radius, startAngle, endAngle, false);
         radarCtx.closePath();
-        radarCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        radarCtx.fillStyle = 'rgba(255, 255, 255, 0.06)';
         radarCtx.fill();
 
-        // 2. 고정 거리 눈금 동심원 (화이트 격자선)
+        // 2. 동심원 거리 가이드라인 (1m 간격)
         const circles = 6;
-        radarCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        radarCtx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
         radarCtx.lineWidth = 1 * window.devicePixelRatio;
         for (let i = 1; i <= circles; i++) {
             const r = (radius / circles) * i;
@@ -2169,7 +2228,7 @@
             radarCtx.stroke();
         }
 
-        // 3. 각도 분할선 (-60° ~ +60°, 화이트 격자선)
+        // 3. 각도 분할선
         for (let deg = -60; deg <= 60; deg += 15) {
             const rad = (deg + 90) * (Math.PI / 180);
             const lineX = originX + radius * Math.cos(rad);
@@ -2177,11 +2236,11 @@
             radarCtx.beginPath();
             radarCtx.moveTo(originX, originY);
             radarCtx.lineTo(lineX, lineY);
-            radarCtx.strokeStyle = (deg === 0) ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.12)';
+            radarCtx.strokeStyle = (deg === 0) ? 'rgba(255, 255, 255, 0.45)' : 'rgba(255, 255, 255, 0.1)';
             radarCtx.stroke();
         }
 
-        // 4. 연속 확장 파동(Radar Sonar Waves) 렌더링
+        // 4. 소나 파동 애니메이션
         for (let i = 0; i < waves.length; i++) {
             waves[i].progress += 0.007;
             if (waves[i].progress > 1.0) {
@@ -2195,53 +2254,48 @@
             radarCtx.beginPath();
             radarCtx.arc(originX, originY, waveR, startAngle, endAngle, false);
             radarCtx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-            radarCtx.lineWidth = (2.5 * (1 - p * 0.5)) * window.devicePixelRatio;
+            radarCtx.lineWidth = (2.2 * (1 - p * 0.5)) * window.devicePixelRatio;
             radarCtx.shadowColor = '#ffffff';
-            radarCtx.shadowBlur = 10 * (1 - p);
+            radarCtx.shadowBlur = 8 * (1 - p);
             radarCtx.stroke();
             radarCtx.shadowBlur = 0;
-
-            if (waveR > 10) {
-                radarCtx.beginPath();
-                radarCtx.moveTo(originX, originY);
-                radarCtx.arc(originX, originY, waveR, startAngle, endAngle, false);
-                radarCtx.closePath();
-                const waveGrad = radarCtx.createRadialGradient(originX, originY, Math.max(0, waveR - 35), originX, originY, waveR);
-                waveGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-                waveGrad.addColorStop(1, `rgba(255, 255, 255, ${alpha * 0.15})`);
-                radarCtx.fillStyle = waveGrad;
-                radarCtx.fill();
-            }
         }
         radarCtx.restore();
 
-        // 5. 감지된 타깃 발광 & 파동 반응 애니메이션 (빨간색)
+        // 5. Radar 1 타깃 렌더링 (직교 좌표 투영)
         const time = Date.now() * 0.006;
         const pulse = (Math.sin(time) + 1) / 2;
 
         radarTargets.forEach(t => {
-            if (!t.active || t.dist <= 0) return;
+            if (!t.active || t.y <= 0) return;
 
-            const distRatio = Math.min(t.dist / MAX_RADAR_DIST, 1.0);
-            const targetRad = (t.angle + 90) * (Math.PI / 180);
-            const targetX = originX + (radius * distRatio) * Math.cos(targetRad);
-            const targetY = originY + (radius * distRatio) * Math.sin(targetRad);
+            // 센서 직교 좌표 (X: 좌우, Y: 전방) -> 캔버스 픽셀 좌표 매핑
+            const canvasX = originX + (t.x * scaleX);
+            const canvasY = originY + (t.y * scaleY);
 
             radarCtx.save();
+            // 외곽 펄스 링
             radarCtx.beginPath();
-            radarCtx.arc(targetX, targetY, (7 + pulse * 7) * window.devicePixelRatio, 0, Math.PI * 2);
-            radarCtx.strokeStyle = `rgba(255, 74, 90, ${0.85 - pulse * 0.6})`;
+            radarCtx.arc(canvasX, canvasY, (7 + pulse * 6) * window.devicePixelRatio, 0, Math.PI * 2);
+            radarCtx.strokeStyle = `rgba(255, 74, 90, ${0.85 - pulse * 0.5})`;
             radarCtx.lineWidth = 1.8 * window.devicePixelRatio;
             radarCtx.shadowColor = '#ff4a5a';
             radarCtx.shadowBlur = 8;
             radarCtx.stroke();
 
+            // 중심 타깃 점
             radarCtx.beginPath();
-            radarCtx.arc(targetX, targetY, 4.5 * window.devicePixelRatio, 0, Math.PI * 2);
+            radarCtx.arc(canvasX, canvasY, 4.5 * window.devicePixelRatio, 0, Math.PI * 2);
             radarCtx.fillStyle = '#ff4a5a';
             radarCtx.shadowColor = '#ff4a5a';
-            radarCtx.shadowBlur = 14;
+            radarCtx.shadowBlur = 12;
             radarCtx.fill();
+
+            // 거리 라벨
+            radarCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            radarCtx.font = `bold ${10 * window.devicePixelRatio}px 'JetBrains Mono'`;
+            radarCtx.fillText(`T${t.id}: ${t.y.toFixed(2)}m`, canvasX + (8 * window.devicePixelRatio), canvasY - (4 * window.devicePixelRatio));
+
             radarCtx.restore();
         });
 

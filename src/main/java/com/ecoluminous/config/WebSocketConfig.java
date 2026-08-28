@@ -22,14 +22,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 1. 웹(프론트엔드 - SockJS 전용)
+        // 1. 순수 웹소켓 엔드포인트 (라즈베리파이 / Python websocket-client 전용)
+        registry.addEndpoint("/ws-stomp")
+                .setAllowedOriginPatterns("*");
+
+        // 2. SockJS 엔드포인트 (웹 브라우저 프론트엔드 전용)
         registry.addEndpoint("/ws-stomp")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
-
-        // 2. 파이썬/하드웨어 (Pure WebSocket 전용)
-        registry.addEndpoint("/ws-stomp/websocket")
-                .setAllowedOriginPatterns("*");
     }
 
     @Override

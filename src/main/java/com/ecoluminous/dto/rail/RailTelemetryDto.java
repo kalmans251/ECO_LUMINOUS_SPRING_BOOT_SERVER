@@ -5,40 +5,27 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@Data // 👈 필수 (@Getter, @Setter, @ToString 등 포함)
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RailStatusResponseDto {
+public class RailTelemetryDto {
     private String apiKey;
-    private Long railInfoId;
     private Integer railSeq;
-    private Integer railMode;
-    private Object status;
-    private Boolean isOnline;
-    private LocalDateTime lastConnectedAt;
-
     private Double leftWatt;
     private Double rightWatt;
     private Integer batteryPct;
-    private Double latestLeftWatt;
-    private Double latestRightWatt;
-    private Integer latestBatteryPct;
-    private Boolean isCharging;
-
+    private Integer railMode;
     private Integer inCount;
     private Integer outCount;
-
-    // 💡 라즈베리파이 JSON 키와 정확히 일치해야 하는 레이더 필드
     private List<RadarTargetDto> radar1Targets;
     private List<RadarTargetDto> radar2Targets;
     private Boolean radar1Detected;
     private Boolean radar2Detected;
-
     private Integer emergencyCode;
+    private Boolean isCharging;
     private Boolean isEmergency;
     private Boolean isError;
 }
