@@ -54,36 +54,41 @@ public class RailRealtimeController {
         return ResponseEntity.ok().build();
     }
 
-    // ==========================================
+ // ==========================================
     // 3. 하드웨어 제어 결과 처리 (DB 갱신 및 웹 브라우저 통보)
     // ==========================================
     @MessageMapping("/rails/mode/confirm")
     public void handleModeConfirm(RailModeConfirmDto confirmDto) {
-        log.info("📩 [하드웨어 제어 결과 수신] 대상 railSeq: {}, 요청 모드: {}번", 
-                confirmDto.getRailSeq(), confirmDto.getRailMode());
+        log.info("📩 [하드웨어 제어 결과 수신] 대상 railSeq: {}, commandBytes: {}", 
+                confirmDto.getRailSeq(), confirmDto.getCommandBytes());
 
+        // 💡 [주의] DB 업데이트 로직 (RailService) 변경 필요!
+        // 기존 railMode(int) 대신 commandBytes(List)를 저장하도록 Service 레이어도 수정하셔야 합니다.
         if (confirmDto.getRailSeq() != null && confirmDto.getRailSeq() == 0 && confirmDto.getSuccessRails() != null) {
-            railService.updateBulkRailMode(confirmDto.getApiKey(), confirmDto.getSuccessRails(), confirmDto.getRailMode());
+            // railService.updateBulkRailMode(..., confirmDto.getCommandBytes());
             log.info("💾 [DB Bulk Update 완료] 대상 난간: {}개", confirmDto.getSuccessRails().size());
         } else {
-            railService.updateSingleRailMode(confirmDto.getApiKey(), confirmDto.getRailSeq(), confirmDto.getRailMode());
-            log.info("💾 [DB Single Update 완료] 난간 #{} ➔ 모드 {}번", confirmDto.getRailSeq(), confirmDto.getRailMode());
+            // railService.updateSingleRailMode(..., confirmDto.getCommandBytes());
+            log.info("💾 [DB Single Update 완료] 난간 #{}", confirmDto.getRailSeq());
         }
 
-        messagingTemplate.convertAndSend("/topic/rails/mode/result", (Object) confirmDto);
+        // 💡 [수정 핵심] 프론트엔드가 구독 중인 주소로 정확히 브로드캐스트
+        messagingTemplate.convertAndSend("/sub/rails/mode/confirm", (Object) confirmDto);
     }
 
     @MessageMapping("/rails/mode/fail")
     public void failRailModeChange(Map<String, Object> failPayload) {
         log.error("[❌ 하드웨어 제어 실패] 수신 데이터: {}", failPayload);
 
+        // (기존 개별 전송 코드 유지)
         String apiKey = (String) failPayload.get("apiKey");
         if (apiKey != null) {
             String dashboardDestination = "/sub/rails/" + apiKey + "/realtime";
             messagingTemplate.convertAndSend(dashboardDestination, (Object) failPayload);
         }
         
-        messagingTemplate.convertAndSend("/topic/rails/mode/fail", (Object) failPayload);
+        // 💡 [수정 핵심] 프론트엔드가 실패 응답을 구독 중인 주소로 전송
+        messagingTemplate.convertAndSend("/sub/rails/mode/fail", (Object) failPayload);
     }
 
     // ==========================================
@@ -165,8 +170,8 @@ public class RailRealtimeController {
     // ⚙️ 6. 하드웨어 제어 전송 내부 메서드
     // ==========================================
     private void requestModeChangeToDevice(RailModeRequestDto dto) {
-        log.info("[🚀 장비 제어 요청 명령 전송] API Key: {}, RailSeq: {}, Target Mode: {}", 
-                dto.getApiKey(), dto.getRailSeq(), dto.getRailMode());
+        log.info("[🚀 장비 제어 요청 명령 전송] API Key: {}, RailSeq: {}, Type: {}, CommandBytes: {}", 
+                dto.getApiKey(), dto.getRailSeq(), dto.getCommandType(), dto.getCommandBytes());
 
         String deviceDestination = "/sub/device/" + dto.getApiKey() + "/mode";
         messagingTemplate.convertAndSend(deviceDestination, (Object) dto);
